@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	char note = '0';	// Read note
 	char octave = '0';	// Read octave
 	int octaven = 0;	// Octave as integer
-	char length = 0;	// Read note length
+	char length[2];	// Read note length
 	int frequency = 0;	// Frequency from table
 	int beat = 0;
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 		}
 		note = read[0];
 		octave = read[1];
-		length = read[3];
+		length[0] = read[3];
 		octaven = octave - '0';
 		switch (note) {
 			case 'A':
@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'G':
 				frequency = note_lookup[G][octaven];
+				break;
 			case '0':
 				frequency = 0;
 				break;
@@ -167,14 +168,15 @@ int main(int argc, char *argv[])
 		}
 		sprintf(sound, "%d", frequency);
 		strcat(sound, end);
+		strcat(length, end);
 		write(fd, sound, strlen(sound));
+		write(fd, length, strlen(length));
+		usleep(250000);
 		//readSerial(fd);
-		write(fd, &length, 1);
-		//readSerial(fd);
-		printf("Read note:%c\n", note);
-		printf("Read octave:%c\n", octave);
-		printf("Read length:%c\n", length);
-		printf("Looked up frequency:%d\n\n", frequency);
+		//printf("Read note:%c\n", note);
+		//printf("Read octave:%c\n", octave);
+		//printf("Read length:%c\n", length);
+		//printf("Looked up frequency:%d\n\n", frequency);
 		/*if ((inote >= 0) && (inote < 65535)) {
 			printf("after function note value: %d\n", cnote);
 			sprintf(sound, "%d", cnote);
