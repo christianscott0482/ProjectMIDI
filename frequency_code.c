@@ -23,7 +23,6 @@
 #define A 9
 #define B 11
 
-//void readSerial(int file);
 
 int main(int argc, char *argv[])
 {
@@ -129,7 +128,6 @@ int main(int argc, char *argv[])
 	// Begin transmission
 
 	while(1) {
-		printf("start of scan\n");
 		if((fscanf(fb, "%s", read) == EOF)) {
 			printf("End of file reached\n");
 			break;
@@ -169,57 +167,13 @@ int main(int argc, char *argv[])
 		sprintf(sound, "%d", frequency);
 		strcat(sound, end);
 		strcat(length, end);
+		printf("Frequency sent:%d\n", frequency);
+		printf("Note Length Sent:%c\n", read[3]);
 		write(fd, sound, strlen(sound));
 		write(fd, length, strlen(length));
 		usleep(250000);
-		//readSerial(fd);
-		//printf("Read note:%c\n", note);
-		//printf("Read octave:%c\n", octave);
-		//printf("Read length:%c\n", length);
-		//printf("Looked up frequency:%d\n\n", frequency);
-		/*if ((inote >= 0) && (inote < 65535)) {
-			printf("after function note value: %d\n", cnote);
-			sprintf(sound, "%d", cnote);
-			strcat(sound, end);
-			printf("your number is: ");
-			for (i = 0; i < 7; i++) {
-				printf("%c", sound[i]);
-			}
-			printf("\n");
-			printf("before write\n");
-			write(fd, sound, strlen(sound));
-			printf("after write\n");
-			memset(sound, 0, strlen(sound));
-			printf("after memset\n");
-			usleep(beat * 1000);
-			printf("after sleep\n\n");
-		}
-		else {
-			printf("Value out of range\n");
-		}
-		if (feof(fb)) {
-			printf("End of file reached\n");
-			break;
-		}*/		
 	}
 	return 0;
 
 }
 
-/*void readSerial(int file)
-{
-	char c = 0;
-	int j = 0;
-	char buf[6];
-
-	while  (1){
-		j = 0;
-		printf("before read\n");
-		read(file, &c, 1);
-		printf("after read\n");
-		if(c == '\r') break;
-		buf[j] = c;
-		j++;
-	}
-	printf("%s\n", buf);
-}*/
