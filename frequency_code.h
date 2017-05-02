@@ -4,7 +4,7 @@
 //There are 11 notes in an octave including accidentals. 
 //array of 11 notes, and each note contains it's own array of frequencies,
 //one for of the 9 octaves
-int note_lookup[11][9];
+int note_lookup[12][9];
 //C note
 note_lookup[0] = {16, 32, 65, 130, 261, 523, 1047, 2093, 4186};
 //C# note

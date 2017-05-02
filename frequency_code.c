@@ -11,11 +11,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "frequency_codev2.h"
 
 
 #define BAUDRATE B9600
-
-int convert(int note);
+#define C 0
+#define D 2
+#define E 4
+#define F 5
+#define G 7
+#define A 9
+#define B 11
 
 int main(int argc, char *argv[])
 {
@@ -24,11 +30,16 @@ int main(int argc, char *argv[])
 	struct termios usb;     // Termios struct	
 	char sound[7];		// holds stdout string
 	char end[] = "\r\n";	// end characters to send to AVR
-	char quartlen[4];	//length of quarter note in a song
+	char bpm[4];		// Length of quarter note in a song
+	char note_count[6];	// Number of notes in song; read from file
+	int ncount = 0;		// Interger note_count
+	char read[4];		// Reads note info
+	char note = '0';	// Read note
+	char octave = '0';	// Read octave
+	int octaven = 0;	// Octave as integer
+	char length = 0;	// Read note length
+	int frequency = 0;	// Frequency from table
 	int beat = 0;
-	int inote = 0;
-	int cnote = 0;
-	int i = 0;
 
 	// Expecting two arguments: a device file and an output file
 	if (argc != 3) {
@@ -45,11 +56,12 @@ int main(int argc, char *argv[])
 	}
 	printf("Device file opened ... \n");
 
+
 	// Open song file
 	printf("Opening song file %s ...\n", argv[2]);
 	fb = fopen(argv[2], "r");
 	if (fb == NULL) {
-		printf("Error: failed to open song file %s\n", argv[2]);
+		printf("Error: failed to open song file %s\n", argv[1]);
 		return 3;
 	}
 
@@ -95,25 +107,65 @@ int main(int argc, char *argv[])
 
 	// Clear any preexisting data on the serial interface (input and output)
 	tcflush(fd, TCIOFLUSH);
-
 	
 	// Get first line: the quarternote length for this song
-	fscanf(fb, "%s", quartlen);
-	write(fd, quartlen, strlen(quartlen));
-	beat = atoi(quartlen);
+	fscanf(fb, "%s", bpm);
+	write(fd, bpm, strlen(bpm));
+	beat = atoi(bpm);
 	printf("Beat sent to AVR: %d\n", beat);
+
+	fscanf(fb, "%s", note_count);
+	write(fd, note_count, strlen(note_count));
+	ncount = atoi(note_count);
+	printf("Number of notes: %d\n", ncount);
+
 
 
 	// Begin transmission
 
 	while(1) {
 		printf("start of scan\n");
-		fscanf(fb, "%s", sound);
-		printf("after scan");
-		inote = atoi(sound);
-		printf("note read: %d\n", inote);
-		if ((inote >= 0) && (inote < 65535)) {
-			cnote = convert(inote);
+		if((fscanf(fb, "%s", read) == EOF)) {
+			printf("End of file reached\n");
+			break;
+		}
+		note = read[0];
+		octave = read[1];
+		length = read[3];
+		octaven = octave - '0';
+		switch (note) {
+			case 'A':
+				frequency = note_lookup[A][octaven];
+				break;
+			case 'B':
+				frequency = note_lookup[B][octaven];
+				break;
+			case 'C':
+				frequency = note_lookup[C][octaven];
+				break;
+			case 'D':
+				frequency = note_lookup[D][octaven];
+				break;
+			case 'E':
+				frequency = note_lookup[E][octaven];
+				break;
+			case 'F':
+				frequency = note_lookup[F][octaven];
+				break;
+			case 'G':
+				frequency = note_lookup[G][octaven];
+			default:
+				break;
+		}
+		sprintf(sound, "%d", frequency);
+		strcat(sound, end);
+		write(fd, sound, strlen(sound));
+		write(fd, &length, 1);
+		printf("Read note:%c\n", note);
+		printf("Read octave:%c\n", octave);
+		printf("Read length:%c\n", length);
+		printf("Looked up frequency:%d\n\n", frequency);
+		/*if ((inote >= 0) && (inote < 65535)) {
 			printf("after function note value: %d\n", cnote);
 			sprintf(sound, "%d", cnote);
 			strcat(sound, end);
@@ -136,24 +188,9 @@ int main(int argc, char *argv[])
 		if (feof(fb)) {
 			printf("End of file reached\n");
 			break;
-		}		
+		}*/		
 	}
 	return 0;
 
 }
 
-int convert(int note)
-{
-	double math = 0;
-	double math_note = 0;
-
-	if (note <= 0) {
-		return 0;
-	}
-	math_note = note;
-	math = 1 / math_note;
-	printf("note frequency in time: %f\n", math);
-	math = (math * 1000000) - 1;
-	printf("converted value: %f\n", math);
-	return math;
-}
