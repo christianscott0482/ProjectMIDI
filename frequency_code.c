@@ -23,6 +23,8 @@
 #define A 9
 #define B 11
 
+//void readSerial(int file);
+
 int main(int argc, char *argv[])
 {
 	int fd = 0;		// File descriptor for serial port
@@ -111,11 +113,14 @@ int main(int argc, char *argv[])
 	// Get first line: the quarternote length for this song
 	fscanf(fb, "%s", bpm);
 	write(fd, bpm, strlen(bpm));
+	printf("After write, before read");
+	//readSerial(fd);
 	beat = atoi(bpm);
 	printf("Beat sent to AVR: %d\n", beat);
-
+	
 	fscanf(fb, "%s", note_count);
 	write(fd, note_count, strlen(note_count));
+	//readSerial(fd);
 	ncount = atoi(note_count);
 	printf("Number of notes: %d\n", ncount);
 
@@ -154,13 +159,18 @@ int main(int argc, char *argv[])
 				break;
 			case 'G':
 				frequency = note_lookup[G][octaven];
+			case '0':
+				frequency = 0;
+				break;
 			default:
 				break;
 		}
 		sprintf(sound, "%d", frequency);
 		strcat(sound, end);
 		write(fd, sound, strlen(sound));
+		//readSerial(fd);
 		write(fd, &length, 1);
+		//readSerial(fd);
 		printf("Read note:%c\n", note);
 		printf("Read octave:%c\n", octave);
 		printf("Read length:%c\n", length);
@@ -194,3 +204,20 @@ int main(int argc, char *argv[])
 
 }
 
+/*void readSerial(int file)
+{
+	char c = 0;
+	int j = 0;
+	char buf[6];
+
+	while  (1){
+		j = 0;
+		printf("before read\n");
+		read(file, &c, 1);
+		printf("after read\n");
+		if(c == '\r') break;
+		buf[j] = c;
+		j++;
+	}
+	printf("%s\n", buf);
+}*/
